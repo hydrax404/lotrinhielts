@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Coaching Dashboard - Lộ Trình 32 Buổi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .phase-tab.active { background-color: #4f46e5; color: white; border-color: #4f46e5; }
+        .skill-badge-rl { background-color: #dbeafe; color: #1e40af; }
+        .skill-badge-ws { background-color: #fce7f3; color: #9d174d; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">IELTS Study Roadmap</h1>
+                    <p class="text-xs text-slate-500">Học viên: Hoàng Minh • Mục tiêu: 7.0+ Overall</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleStudentMode()" id="modeBtn" class="px-3.5 py-2 rounded-lg text-sm font-medium border border-slate-300 bg-white hover:bg-slate-50 transition flex items-center gap-2">
+                    <i class="fa-solid fa-eye"></i> <span>Chế độ Giáo viên</span>
+                </button>
+                <button onclick="exportCSV()" class="px-3.5 py-2 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-file-csv"></i> <span>Xuất CSV</span>
+                </button>
+                <button onclick="resetData()" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 transition" title="Khôi phục dữ liệu gốc từ Sheet">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tiến độ khóa học</p>
+                        <h3 class="text-2xl font-bold mt-1 text-indigo-600" id="stat-progress">0/32 Buổi</h3>
+                    </div>
+                    <span class="bg-indigo-50 text-indigo-600 p-2.5 rounded-xl"><i class="fa-solid fa-chart-pie"></i></span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+                    <div id="progress-bar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Buổi tiếp theo</p>
+                        <h3 class="text-lg font-bold mt-1 text-slate-800 truncate" id="stat-next">Buổi 5 (14/10)</h3>
+                    </div>
+                    <span class="bg-amber-50 text-amber-600 p-2.5 rounded-xl"><i class="fa-solid fa-forward-step"></i></span>
+                </div>
+                <p class="text-xs text-slate-500 mt-3 truncate" id="stat-next-desc">Gỡ lỗi Read & Lis • Matching</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Giai đoạn hiện tại</p>
+                        <h3 class="text-base font-bold mt-1 text-slate-800" id="stat-phase">Tháng 1: Chẩn đoán</h3>
+                    </div>
+                    <span class="bg-blue-50 text-blue-600 p-2.5 rounded-xl"><i class="fa-solid fa-layer-group"></i></span>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">4 Giai đoạn • 32 Buổi</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm fee-column">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tình trạng Học phí</p>
+                        <h3 class="text-2xl font-bold mt-1 text-emerald-600" id="stat-fee">1/32 Buổi</h3>
+                    </div>
+                    <span class="bg-emerald-50 text-emerald-600 p-2.5 rounded-xl"><i class="fa-solid fa-wallet"></i></span>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">Tích chọn bên dưới để cập nhật</p>
+            </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 space-y-4">
+            <!-- Phase Tabs -->
+            <div class="flex flex-wrap gap-2">
+                <button onclick="setPhaseFilter('ALL')" class="phase-tab active px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 transition">Tất cả (32)</button>
+                <button onclick="setPhaseFilter('Tháng 1: Chẩn đoán & Lý thuyết')" class="phase-tab px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 hover:bg-slate-50 transition">Tháng 1: Chẩn đoán & Lý thuyết</button>
+                <button onclick="setPhaseFilter('Tháng 2: Tối ưu & Mở rộng')" class="phase-tab px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 hover:bg-slate-50 transition">Tháng 2: Tối ưu & Mở rộng</button>
+                <button onclick="setPhaseFilter('Tháng 3: Tăng tốc & Phản xạ')" class="phase-tab px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 hover:bg-slate-50 transition">Tháng 3: Tăng tốc & Phản xạ</button>
+                <button onclick="setPhaseFilter('Tháng 4: Nước rút & Điểm rơi')" class="phase-tab px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 hover:bg-slate-50 transition">Tháng 4: Nước rút & Điểm rơi</button>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center gap-4 pt-2 border-t border-slate-100">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold text-slate-400 uppercase mr-1">Kỹ năng:</span>
+                    <button onclick="setSkillFilter('ALL')" id="skill-ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-white">Tất cả</button>
+                    <button onclick="setSkillFilter('READ + LIS')" id="skill-RL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100">READ + LIS</button>
+                    <button onclick="setSkillFilter('WRITE + SPEAK')" id="skill-WS" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-pink-50 text-pink-700 hover:bg-pink-100">WRITE + SPEAK</button>
+                </div>
+
+                <div class="relative flex-1 max-w-xs">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" oninput="renderSessions()" placeholder="Tìm bài học, BTVN, nhận xét..." class="w-full pl-9 pr-4 py-1.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Grid -->
+        <div id="sessions-container" class="space-y-4"></div>
+
+    </main>
+
+    <script>
+        const initialSessions = [
+            { id: 1, buoi: "Buổi 1 (21/09)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "READ + LIS", content: "• Read: Lý thuyết chiến thuật 1-5-9, thực hành 1 passage mẫu\n- Thực hành: [YouPass Collect] - The life of Beatrix Potter (Hdan), Termite Mounds (Hdan)\n• Hướng dẫn lập Error Log (Nhật ký lỗi)\n• Lis: Tips-trick listening [YouPass Collect] - Shampoo Marketing Project", btvn: "Chưa giao", done: true, note: "- Yếu phần vocab\n- Buổi nay mới chỉ làm quen cách làm reading thôi\n- Lis giỏi r nên hnay k dạy phần đấy", fee: true },
+            { id: 2, buoi: "Buổi 2 (06/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "WRITE + SPEAK", content: "• Write T1: Lý thuyết Biểu đồ (Line/Bar), cách viết Mở bài & Overview", btvn: "• Write: 1 bài line, 1 bài bar, 1 bài pie (Nộp trc 1 ngày học)\n- Tạo vocab 1 (35 từ)", done: true, note: "- bth", fee: false },
+            { id: 3, buoi: "Buổi 3 (07/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "READ + LIS", content: "• Chữa CAM 13 Test 1 + kiểm tra từ vựng", btvn: "• CAM 13 Test 2 (R/L)\n• Học Vocab 1", done: true, note: "- Listening khá tốt ko vấn đề gì nhưng Read hơi kém mấy cái bài matching\n- Hnay chưa học từ vựng", fee: false },
+            { id: 4, buoi: "Buổi 4 (13/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "WRITE + SPEAK", content: "• Write T1: Lý thuyết Pie chart, Map, Process, từ vựng đặc thù", btvn: "• Write: 1 bài Process, 1 bài Map\n- Vocab 2 (35 từ)\n- Mới giao 4 đề lẻ 1 tuần để luyện", done: true, note: "- Chưa thuộc từ vựng lắm, buổi WT sau dạy luôn phần ngữ pháp", fee: false },
+            { id: 5, buoi: "Buổi 5 (14/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "READ + LIS", content: "• Gỡ lỗi Read & Lis (15p)\n• Read: Thực hành 1-5-9 dạng Matching Headings/Info\n• Lis: Luyện bắt keyword đổi hướng (But, Actually)", btvn: "• Youpass: 3 passage Read (có Matching)\n• Youpass: 2 bài Lis P3", done: false, note: "", fee: false },
+            { id: 6, buoi: "Buổi 6 (20/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "WRITE + SPEAK", content: "• Write T2: Lý thuyết dạng Opinion/Discussion\n• Đóng khung cấu trúc Mở bài & Kết bài\n• Speak: Thực hành P2 tại lớp", btvn: "• Write: 2 Mở+Kết bài T2 (Docs)\n• Luyennoi: Ghi âm 2 topic P2", done: false, note: "", fee: false },
+            { id: 7, buoi: "Buổi 7 (21/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "READ + LIS", content: "• Read: Bấm giờ 1 passage trên lớp + Chữa chi tiết\n• Lis: Test kỹ năng P3 & P4\n• Review Error Log", btvn: "• Youpass: 1 Full Read (60p)\n• Điền Error Log", done: false, note: "", fee: false },
+            { id: 8, buoi: "Buổi 8 (27/10)", phase: "Tháng 1: Chẩn đoán & Lý thuyết", skill: "WRITE + SPEAK", content: "• Write T2: Phát triển Thân bài (Idea -> Explain -> Example)\n• Thực hành viết 1 Thân bài tại lớp\n• Speak: Ráp nối kỹ năng P1 & P2", btvn: "• Write: 2 Thân bài T2 hoàn chỉnh (Docs)\n• Luyennoi: 1 set P1+P2", done: false, note: "", fee: false },
+            { id: 9, buoi: "Buổi 9 (28/10)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "READ + LIS", content: "• Gỡ lỗi Full Read (20p)\n• Read: Tăng tốc 1-5-9, đoán nghĩa qua ngữ cảnh\n• Lis: Phân tích bẫy Multiple Choice khó", btvn: "• Youpass: 2 Full Read\n• Youpass: 1 Full Lis", done: false, note: "", fee: false },
+            { id: 10, buoi: "Buổi 10 (03/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "WRITE + SPEAK", content: "• Write T2: Lý thuyết dạng Problem/Solution & 2-part\n• Cung cấp Collocations chủ đề Edu/Env\n• Speak: Lý thuyết Part 3 & mở rộng ý", btvn: "• Write: 2 bài T2 (Edu/Env)\n• Luyennoi: Ghi âm P3", done: false, note: "", fee: false },
+            { id: 11, buoi: "Buổi 11 (04/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "READ + LIS", content: "• Read: Thực chiến passage siêu khó (Cam 18/19)\n• Lis: Xử lý dạng Map/Diagram\n• Gỡ lỗi Error Log", btvn: "• Youpass: 2 Full Read\n• Youpass: Luyện riêng Map Lis", done: false, note: "", fee: false },
+            { id: 12, buoi: "Buổi 12 (10/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "WRITE + SPEAK", content: "• Write: Nâng cấp câu đơn thành câu phức/ghép\n• Chữa bài Docs, sửa lỗi ngữ pháp\n• Speak: Phản xạ nhanh P1 + P2", btvn: "• Write: 1 T1 (Map) + 1 T2\n• Luyennoi: 3 đề P2", done: false, note: "", fee: false },
+            { id: 13, buoi: "Buổi 13 (11/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "READ + LIS", content: "• ĐÁNH GIÁ GIỮA KỲ: Test Read + Lis 60p tại lớp\n• Chữa bài & Đánh giá khoảng cách đến mốc 7.5", btvn: "• Tự review toàn bộ Error Log Read & Lis", done: false, note: "", fee: false },
+            { id: 14, buoi: "Buổi 14 (17/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "WRITE + SPEAK", content: "• Write: Tối ưu Coherence (Logic giữa các câu)\n• Brainstorm chủ đề Tech/Society\n• Speak: Tips chống bí ý tưởng", btvn: "• Write: 2 bài T2 (Tech/Society)\n• Luyennoi: Ghi âm P3 khó", done: false, note: "", fee: false },
+            { id: 15, buoi: "Buổi 15 (18/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "READ + LIS", content: "• Read: Khắc phục điểm yếu T/F/NG\n• Lis: Đẩy tốc độ nghe lên 1.25x P3", btvn: "• Youpass: 2 Full Read (Bấm 55p)\n• Điền Error Log", done: false, note: "", fee: false },
+            { id: 16, buoi: "Buổi 16 (24/11)", phase: "Tháng 2: Tối ưu & Mở rộng", skill: "WRITE + SPEAK", content: "• Write: Thực hành viết Full đề (T1+T2) trong 60p\n• Speak: Mock test ngắn tại lớp", btvn: "• Write: 1 Full T1+T2\n• Đọc lại Error Log Write", done: false, note: "", fee: false },
+            { id: 17, buoi: "Buổi 17 (25/11)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "READ + LIS", content: "• Gỡ lỗi Read (15p)\n• Read: Kỹ năng 'cứu net' khi sắp hết giờ\n• Lis: Xử lý dạng Matching P2 & P3", btvn: "• Youpass: 3 Full Read (Ép 55p)\n• Youpass: 1 Full Lis", done: false, note: "", fee: false },
+            { id: 18, buoi: "Buổi 18 (01/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "WRITE + SPEAK", content: "• Write: Ép thời gian lập dàn ý 5p cho mọi đề T2\n• Speak: Drill idioms & collocations P3", btvn: "• Write: 1 T2 hoàn chỉnh\n• Lập 5 dàn ý T2 ngẫu nhiên", done: false, note: "", fee: false },
+            { id: 19, buoi: "Buổi 19 (02/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "READ + LIS", content: "• Read: Kỹ thuật scanning chữ hoa/tên riêng siêu tốc\n• Lis: Tối ưu điểm P1 & P4 (chống sai spelling)", btvn: "• Youpass: 2 Full Read\n• Youpass: 1 Full Lis", done: false, note: "", fee: false },
+            { id: 20, buoi: "Buổi 20 (08/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "WRITE + SPEAK", content: "• Write: Chữa bài Docs, tinh chỉnh Lexical Resource\n• Speak: Chữa phát âm, luyện intonation", btvn: "• Write: 2 bài T1 (Biểu đồ)\n• Luyennoi: 1 Full Speak test", done: false, note: "", fee: false },
+            { id: 21, buoi: "Buổi 21 (09/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "READ + LIS", content: "• Mock test kỹ năng Read (60p) tại lớp\n• Phân tích xu hướng ra bẫy của Cam 19", btvn: "• Chữa lại các câu sai trong Mock test\n• Review Error Log", done: false, note: "", fee: false },
+            { id: 22, buoi: "Buổi 22 (15/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "WRITE + SPEAK", content: "• Write: Khắc phục lỗi lặp từ miêu tả xu hướng T1\n• Speak: Test Full Speaking như thi thật", btvn: "• Write: 1 Full T1+T2 (60p)\n• Luyennoi: Ghi âm lại các câu vấp", done: false, note: "", fee: false },
+            { id: 23, buoi: "Buổi 23 (16/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "READ + LIS", content: "• Read: Khắc sâu thuật toán 1-5-9 cho đa chủ đề\n• Lis: Tổng ôn mẹo P3, gỡ điểm yếu cuối cùng", btvn: "• Youpass: 2 Full (Read+Lis)\n• Chuẩn bị Mock test", done: false, note: "", fee: false },
+            { id: 24, buoi: "Buổi 24 (22/12)", phase: "Tháng 3: Tăng tốc & Phản xạ", skill: "WRITE + SPEAK", content: "• Write: Tổng duyệt toàn bộ cấu trúc & template\n• Speak: Review framework, gỡ tâm lý", btvn: "• Review Error Log Write từ đầu khóa\n• Chuẩn bị Mock test", done: false, note: "", fee: false },
+            { id: 25, buoi: "Buổi 25 (23/12)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "READ + LIS", content: "• FULL MOCK TEST (Lis + Read) tại lớp (120p)\n• Rèn sức bền làm bài liên tục", btvn: "• Chấm điểm Mock test & Điền Error Log", done: false, note: "", fee: false },
+            { id: 26, buoi: "Buổi 26 (29/12)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "WRITE + SPEAK", content: "• Mock Test Write (60p) + Speak (20p) tại lớp\n• Chữa nhanh & nhận xét trực tiếp", btvn: "• Làm 1 Full Mock Test 4 kỹ năng (cuối tuần)", done: false, note: "", fee: false },
+            { id: 27, buoi: "Buổi 27 (30/12)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "READ + LIS", content: "• Chữa Full Mock test B25\n• Read: Kỹ năng duy trì tập trung cho Passage 3", btvn: "• Youpass: 1 Full (Read+Lis)\n• Đọc Error Log Read", done: false, note: "", fee: false },
+            { id: 28, buoi: "Buổi 28 (05/01)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "WRITE + SPEAK", content: "• Chữa Mock test B26\n• Write: Chốt phân bổ thời gian (T1 20p, T2 40p)\n• Speak: Chỉnh phong thái, eye contact", btvn: "• Write: 1 Full T1+T2 bấm giờ", done: false, note: "", fee: false },
+            { id: 29, buoi: "Buổi 29 (06/01)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "READ + LIS", content: "• FULL MOCK TEST lần 2 (Lis+Read) 120p\n• Test áp lực phòng thi", btvn: "• Review lỗi sai. Nghỉ ngơi.", done: false, note: "", fee: false },
+            { id: 30, buoi: "Buổi 30 (12/01)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "WRITE + SPEAK", content: "• Chữa Mock test lần 2\n• Dọn lại Error Log chung cùng học sinh\n• Ôn Tips cứu nguy (Bí từ Wri)", btvn: "• Đọc lại dàn ý Write & Template", done: false, note: "", fee: false },
+            { id: 31, buoi: "Buổi 31 (13/01)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "READ + LIS", content: "• Review nhẹ từ vựng Read/Lis\n• Không làm đề mới, giữ tâm lý thoải mái", btvn: "• Nghỉ ngơi, chuẩn bị giấy tờ", done: false, note: "", fee: false },
+            { id: 32, buoi: "Buổi 32 (19/01)", phase: "Tháng 4: Nước rút & Điểm rơi", skill: "WRITE + SPEAK", content: "• Speak: Thi thử 1 lần tạo cảm giác tự tin\n• Ôn Tips cứu nguy (Miss câu nghe)\n• Bơm động lực thi cử", btvn: "• Đi thi (Target: 7.0 Overall)", done: false, note: "", fee: false }
+        ];
+
+        let sessions = JSON.parse(localStorage.getItem('ielts_roadmap_data')) || initialSessions;
+        let currentPhase = 'ALL';
+        let currentSkill = 'ALL';
+        let studentMode = false;
+
+        function saveData() {
+            localStorage.setItem('ielts_roadmap_data', JSON.stringify(sessions));
+            updateStats();
+        }
+
+        function updateStats() {
+            const doneCount = sessions.filter(s => s.done).length;
+            const feeCount = sessions.filter(s => s.fee).length;
+            const percent = Math.round((doneCount / sessions.length) * 100);
+
+            document.getElementById('stat-progress').innerText = `${doneCount}/32 Buổi (${percent}%)`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('stat-fee').innerText = `${feeCount}/32 Buổi`;
+
+            const nextSession = sessions.find(s => !s.done);
+            if (nextSession) {
+                document.getElementById('stat-next').innerText = nextSession.buoi;
+                document.getElementById('stat-next-desc').innerText = nextSession.content.split('\n')[0];
+                document.getElementById('stat-phase').innerText = nextSession.phase.split(':')[0] + ': ' + nextSession.phase.split(':')[1];
+            } else {
+                document.getElementById('stat-next').innerText = "Hoàn thành khóa học!";
+                document.getElementById('stat-next-desc').innerText = "Sẵn sàng đi thi";
+            }
+        }
+
+        function setPhaseFilter(phase) {
+            currentPhase = phase;
+            document.querySelectorAll('.phase-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(phase === 'ALL' ? 'Tất cả' : phase));
+            });
+            renderSessions();
+        }
+
+        function setSkillFilter(skill) {
+            currentSkill = skill;
+            document.getElementById('skill-ALL').className = skill === 'ALL' ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600';
+            document.getElementById('skill-RL').className = skill === 'READ + LIS' ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700';
+            document.getElementById('skill-WS').className = skill === 'WRITE + SPEAK' ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-pink-600 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-pink-50 text-pink-700';
+            renderSessions();
+        }
+
+        function toggleDone(id) {
+            const s = sessions.find(item => item.id === id);
+            if (s) { s.done = !s.done; saveData(); renderSessions(); }
+        }
+
+        function toggleFee(id) {
+            const s = sessions.find(item => item.id === id);
+            if (s) { s.fee = !s.fee; saveData(); renderSessions(); }
+        }
+
+        function updateNote(id, value) {
+            const s = sessions.find(item => item.id === id);
+            if (s) { s.note = value; saveData(); }
+        }
+
+        function toggleStudentMode() {
+            studentMode = !studentMode;
+            const btn = document.getElementById('modeBtn');
+            btn.innerHTML = studentMode ? '<i class="fa-solid fa-user-graduate"></i> <span>Chế độ Học sinh</span>' : '<i class="fa-solid fa-eye"></i> <span>Chế độ Giáo viên</span>';
+            document.querySelectorAll('.fee-column').forEach(el => {
+                el.style.display = studentMode ? 'none' : '';
+            });
+        }
+
+        function renderSessions() {
+            const container = document.getElementById('sessions-container');
+            const query = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = sessions.filter(s => {
+                const matchPhase = currentPhase === 'ALL' || s.phase === currentPhase;
+                const matchSkill = currentSkill === 'ALL' || s.skill === currentSkill;
+                const matchQuery = s.buoi.toLowerCase().includes(query) || s.content.toLowerCase().includes(query) || s.btvn.toLowerCase().includes(query) || s.note.toLowerCase().includes(query);
+                return matchPhase && matchSkill && matchQuery;
+            });
+
+            container.innerHTML = filtered.map(s => `
+                <div class="bg-white rounded-2xl border ${s.done ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200'} p-5 shadow-sm transition hover:shadow-md">
+                    <div class="flex flex-wrap justify-between items-center gap-3 pb-3 mb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleDone(${s.id})" class="w-5 h-5 accent-emerald-600 rounded cursor-pointer" title="Đánh dấu hoàn thành buổi học">
+                            <span class="font-bold text-base ${s.done ? 'line-through text-slate-400' : 'text-slate-900'}">${s.buoi}</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.skill === 'READ + LIS' ? 'skill-badge-rl' : 'skill-badge-ws'}">${s.skill}</span>
+                            <span class="text-xs text-slate-400 font-medium hidden sm:inline">• ${s.phase}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <label class="fee-column flex items-center gap-1.5 text-xs font-medium cursor-pointer ${s.fee ? 'text-emerald-700 bg-emerald-100' : 'text-slate-500 bg-slate-100'} px-3 py-1 rounded-lg" style="${studentMode ? 'display:none' : ''}">
+                                <input type="checkbox" ${s.fee ? 'checked' : ''} onchange="toggleFee(${s.id})" class="accent-emerald-600">
+                                <span>Học phí</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                            <p class="text-xs font-bold uppercase text-slate-400 mb-1.5"><i class="fa-solid fa-book-open mr-1"></i> Nội dung bài học</p>
+                            <div class="text-sm text-slate-700 whitespace-pre-line leading-relaxed">${s.content}</div>
+                        </div>
+
+                        <div class="bg-amber-50/60 p-3.5 rounded-xl border border-amber-100">
+                            <p class="text-xs font-bold uppercase text-amber-700 mb-1.5"><i class="fa-solid fa-list-check mr-1"></i> Bài tập về nhà (BTVN)</p>
+                            <div class="text-sm text-slate-700 whitespace-pre-line leading-relaxed">${s.btvn}</div>
+                        </div>
+
+                        <div class="bg-indigo-50/40 p-3.5 rounded-xl border border-indigo-100 flex flex-col">
+                            <p class="text-xs font-bold uppercase text-indigo-700 mb-1.5"><i class="fa-solid fa-comment-dots mr-1"></i> Nhận xét của Giáo viên</p>
+                            <textarea oninput="updateNote(${s.id}, this.value)" placeholder="Nhập nhận xét buổi học tại đây..." class="w-full flex-1 bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none">${s.note}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function exportCSV() {
+            let csv = "Buổi,Giai đoạn,Kỹ năng,Nội dung,BTVN,Tiến độ,Nhận xét,Học phí\n";
+            sessions.forEach(s => {
+                const clean = str => `"${(str || '').replace(/"/g, '""')}"`;
+                csv += `${clean(s.buoi)},${clean(s.phase)},${clean(s.skill)},${clean(s.content)},${clean(s.btvn)},${s.done},${clean(s.note)},${s.fee}\n`;
+            });
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "Lo_Trinh_IELTS_Cap_Nhat.csv";
+            link.click();
+        }
+
+        function resetData() {
+            if (confirm("Khôi phục lại dữ liệu ban đầu từ Google Sheet?")) {
+                localStorage.removeItem('ielts_roadmap_data');
+                sessions = JSON.parse(JSON.stringify(initialSessions));
+                saveData();
+                renderSessions();
+            }
+        }
+
+        updateStats();
+        renderSessions();
+    </script>
+</body>
+</html>
